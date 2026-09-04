@@ -35,7 +35,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 60px 20px 40px; /* Większy padding u góry na przyciski */
+            padding: 60px 20px 40px;
             margin: 0;
             transition: background-color 0.3s, color 0.3s;
         }
@@ -375,7 +375,6 @@
 
         function openCategory(categoryName) {
             const title = document.getElementById('category-title');
-            // Zmiana tytułu zależnie od języka
             const dictKey = 'cat' + categoryName.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('');
             title.textContent = dictionary[currentLang][dictKey] || categoryName;
             
@@ -514,7 +513,6 @@
             if (answer === correct) {
                 feedback.textContent = dictionary[currentLang].quizCorrect;
                 feedback.className = 'quiz-feedback correct';
-                // Automatyczne odtworzenie po poprawnej odpowiedzi
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
                     const utt = new SpeechSynthesisUtterance(quizCards[currentQuizIndex].es);
