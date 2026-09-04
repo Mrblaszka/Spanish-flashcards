@@ -40,6 +40,7 @@
         .btn-quiz-hard:hover { background-color: #c82333; }
         
         .btn-hint { background-color: #ffc107; color: #333; }
+        .btn-hint:disabled { background-color: #ffe8a1; color: #999; cursor: not-allowed; }
         .btn-back { background-color: #6c757d; margin-bottom: 20px; align-self: flex-start; }
         
         .nav-grid {
@@ -61,6 +62,8 @@
             background-color: transparent; width: 100%; height: 150px; perspective: 1000px;
             cursor: pointer; position: relative;
         }
+        
+        /* --- Przyciski na fiszce --- */
         .star-btn {
             position: absolute; top: 10px; right: 10px; font-size: 1.5rem;
             cursor: pointer; z-index: 10; opacity: 0.2; transition: 0.2s;
@@ -68,6 +71,14 @@
         }
         .star-btn.active {
             opacity: 1; color: #ffeb3b; text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        .audio-btn {
+            position: absolute; top: 10px; left: 10px; font-size: 1.5rem;
+            cursor: pointer; z-index: 10; opacity: 0.5; transition: 0.2s;
+            text-shadow: 0 0 2px rgba(255,255,255,0.5); user-select: none;
+        }
+        .audio-btn:hover {
+            opacity: 1; transform: scale(1.1);
         }
 
         .card-inner {
@@ -90,7 +101,7 @@
             text-align: center; width: 100%; max-width: 600px; margin-top: 20px;
         }
         .quiz-word { font-size: 2.5rem; margin-bottom: 25px; color: #2193b0; font-weight: bold; }
-        .quiz-input { padding: 15px; width: 80%; font-size: 1.2rem; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 8px; text-align: center; outline: none; }
+        .quiz-input { padding: 15px; width: 80%; font-size: 1.2rem; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 8px; text-align: center; outline: none; transition: 0.3s; }
         .quiz-input:focus { border-color: #2193b0; }
         .quiz-feedback { margin-top: 20px; font-size: 1.3rem; font-weight: bold; min-height: 30px; }
         .quiz-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
@@ -164,10 +175,10 @@
     </div>
 
     <script>
-        // === PASTE YOUR GOOGLE APPS SCRIPT LINK HERE ===
+        // === W TYM MIEJSCU PODMIEŃ LINK NA SWÓJ ===
         const API_URL = "https://script.google.com/macros/s/AKfycbwyNkhxYdjVc6xdMzJtwMI9V3HW3kGsJv7T3r86m0oWQbsVzy0fpUQX62_MnKscxfx4/exec";
 
-        // Updated keys to match English categories
+
         const state = {
             verbs: [], nouns: [], adjectives: [], 
             numbers: [], phrases: [], questions: [], linking_words: []
@@ -183,7 +194,6 @@
                 const data = await response.json();
                 
                 data.forEach(item => {
-                    // Safe mapping if a category exists
                     if(state[item.kategoria]) {
                         item.trudne = (item.trudne === true || item.trudne === 'true' || item.trudne === 'TRUE');
                         state[item.kategoria].push(item);
@@ -202,9 +212,9 @@
             document.getElementById(viewId).classList.add('active');
         }
 
+        // --- RENDEROWANIE KATEGORII (I FISZEK) ---
         function openCategory(categoryName) {
             const title = document.getElementById('category-title');
-            // Format title (e.g. linking_words -> Linking words)
             title.textContent = categoryName.charAt(0).toUpperCase() + categoryName.slice(1).replace('_', ' ');
             
             const container = document.getElementById('flashcards-container');
@@ -222,6 +232,7 @@
                     let isHardClass = card.trudne ? 'active' : '';
                     
                     div.innerHTML = `
+                        <div class="audio-btn" onclick="playAudio(event, '${card.es.replace(/'/g, "\\'")}')">🔊</div>
                         <div class="star-btn ${isHardClass}" onclick="toggleHard(event, '${categoryName}', '${card.es.replace(/'/g, "\\'")}')">⭐</div>
                         <div class="card-inner">
                             <div class="card-front">${card.en}</div>
@@ -383,6 +394,23 @@
                 setTimeout(() => showView('view-home'), 2000);
             }
         });
+
+        // --- FUNKCJA ODTWARZANIA MOWY ---
+        function playAudio(event, text) {
+            event.stopPropagation(); // Blokuje odwrócenie fiszki przy kliknięciu w głośnik
+            
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); 
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'es-ES'; // Kastylijski
+                utterance.rate = 0.9; 
+                
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Your browser does not support audio playback.");
+            }
+        }
     </script>
 </body>
 </html>
