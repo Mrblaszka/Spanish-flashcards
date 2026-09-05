@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Language Flashcards</title>
-    <style> 
+    <style>
         :root {
             --bg-color: #f0f2f5; --text-color: #333; --card-bg: white;
             --input-bg: white; --input-text: #333; --input-border: #ccc;
@@ -25,15 +25,21 @@
         .view { display: none; width: 100%; max-width: 1200px; flex-direction: column; align-items: center; }
         .view.active { display: flex; }
         
-        .add-card-form { display: flex; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center; background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px var(--shadow-color); transition: background-color 0.3s; }
+        .add-card-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 40px; align-items: center; background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px var(--shadow-color); transition: background-color 0.3s; }
+        .inputs-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%; }
         .add-card-form input, .add-card-form select { padding: 10px 15px; font-size: 1rem; border: 1px solid var(--input-border); border-radius: 8px; outline: none; background: var(--input-bg); color: var(--input-text); }
         .btn { padding: 10px 20px; font-size: 1rem; font-weight: 600; background-color: #2193b0; color: white; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; }
         .btn:hover { background-color: #1a7a92; }
         
+        /* --- WIRTUALNA KLAWIATURA HISZPAŃSKA --- */
+        .es-keyboard { display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; width: 100%; }
+        .es-key { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--input-border); border-radius: 6px; padding: 8px 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s; user-select: none; box-shadow: 0 2px 4px var(--shadow-color); }
+        .es-key:hover { background: #2193b0; color: white; border-color: #2193b0; }
+        
         .quiz-buttons-main { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
         .btn-quiz { background-color: #6c757d; font-size: 1.1rem; padding: 15px 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .btn-quiz:hover { filter: brightness(1.1); }
-        .btn-quiz-srs { background-color: #ff5f6d; } /* Czerwony wyróżniony dla SRS */
+        .btn-quiz-srs { background-color: #ff5f6d; }
         .btn-quiz-hard { background-color: #dc3545; }
         
         .btn-hint { background-color: #ffc107; color: #333; }
@@ -48,7 +54,6 @@
         #category-search:focus { border-color: #2193b0; }
 
         .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; width: 100%; }
-        
         .flashcard { background-color: transparent; width: 100%; height: 150px; perspective: 1000px; cursor: pointer; position: relative; }
         .star-btn { position: absolute; top: 10px; right: 10px; font-size: 1.5rem; cursor: pointer; z-index: 10; opacity: 0.2; transition: 0.2s; text-shadow: 0 0 2px rgba(255,255,255,0.5); user-select: none; }
         .star-btn.active { opacity: 1; color: #ffeb3b; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
@@ -65,10 +70,10 @@
 
         .quiz-container { background: var(--card-bg); padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px var(--shadow-color); text-align: center; width: 100%; max-width: 600px; margin-top: 20px; transition: background-color 0.3s; }
         .quiz-word { font-size: 2.5rem; margin-bottom: 25px; color: #2193b0; font-weight: bold; }
-        .quiz-input { padding: 15px; width: 80%; font-size: 1.2rem; margin-bottom: 20px; border: 2px solid var(--input-border); border-radius: 8px; text-align: center; outline: none; transition: 0.3s; background: var(--input-bg); color: var(--input-text); }
+        .quiz-input { padding: 15px; width: 80%; font-size: 1.2rem; margin-bottom: 15px; border: 2px solid var(--input-border); border-radius: 8px; text-align: center; outline: none; transition: 0.3s; background: var(--input-bg); color: var(--input-text); }
         .quiz-input:focus { border-color: #2193b0; }
         .quiz-feedback { margin-top: 20px; font-size: 1.3rem; font-weight: bold; min-height: 30px; }
-        .quiz-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .quiz-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 15px; }
         .correct { color: #28a745; }
         .incorrect { color: #dc3545; }
         #loading-status { color: var(--hint-text); margin-top: 15px; }
@@ -86,20 +91,34 @@
         <h1 data-i18n="title">Language Flashcards</h1>
         
         <div class="add-card-form">
-            <input type="text" id="en-input" data-i18n-placeholder="enPlaceholder" placeholder="English (e.g. cat)">
-            <input type="text" id="es-input" data-i18n-placeholder="esPlaceholder" placeholder="Spanish (e.g. gato)">
-            <input type="text" id="fon-input" data-i18n-placeholder="fonPlaceholder" placeholder="Pronunciation (e.g. [ga-to])">
-            <select id="category-select">
-                <option value="verbs" data-i18n="catVerbs">Verbs</option>
-                <option value="nouns" data-i18n="catNouns">Nouns</option>
-                <option value="adjectives" data-i18n="catAdjectives">Adjectives</option>
-                <option value="numbers" data-i18n="catNumbers">Numbers</option>
-                <option value="phrases" data-i18n="catPhrases">Phrases</option>
-                <option value="questions" data-i18n="catQuestions">Questions</option>
-                <option value="linking_words" data-i18n="catLinking">Linking words</option>
-                <option value="sentences" data-i18n="catSentences">Sentences</option>
-            </select>
-            <button class="btn" id="add-btn" data-i18n="addBtn">Add flashcard</button>
+            <div class="inputs-row">
+                <input type="text" id="en-input" data-i18n-placeholder="enPlaceholder" placeholder="English (e.g. cat)">
+                <input type="text" id="es-input" data-i18n-placeholder="esPlaceholder" placeholder="Spanish (e.g. gato)">
+                <input type="text" id="fon-input" data-i18n-placeholder="fonPlaceholder" placeholder="Pronunciation (e.g. [ga-to])">
+                <select id="category-select">
+                    <option value="verbs" data-i18n="catVerbs">Verbs</option>
+                    <option value="nouns" data-i18n="catNouns">Nouns</option>
+                    <option value="adjectives" data-i18n="catAdjectives">Adjectives</option>
+                    <option value="numbers" data-i18n="catNumbers">Numbers</option>
+                    <option value="phrases" data-i18n="catPhrases">Phrases</option>
+                    <option value="questions" data-i18n="catQuestions">Questions</option>
+                    <option value="linking_words" data-i18n="catLinking">Linking words</option>
+                    <option value="sentences" data-i18n="catSentences">Sentences</option>
+                </select>
+                <button class="btn" id="add-btn" data-i18n="addBtn">Add flashcard</button>
+            </div>
+            <!-- Wirtualna klawiatura w formularzu -->
+            <div class="es-keyboard">
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('es-input', 'á')">á</button>
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('es-input', 'é')">é</button>
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('es-input', 'í')">í</button>
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('es-input', 'ó')">ó</button>
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('es-input', 'ú')">ú</button>
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('es-input', 'ñ')">ñ</button>
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('es-input', 'ü')">ü</button>
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('es-input', '¿')">¿</button>
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('es-input', '¡')">¡</button>
+            </div>
         </div>
 
         <div class="nav-grid">
@@ -114,7 +133,6 @@
         </div>
 
         <div class="quiz-buttons-main">
-            <!-- Dodany główny przycisk do SRS -->
             <button class="btn btn-quiz btn-quiz-srs" onclick="startQuiz('srs')" data-i18n="checkSrs">Smart Review (SRS) 🔥</button>
             <button class="btn btn-quiz" onclick="startQuiz('all')" data-i18n="checkAll">Check all</button>
             <button class="btn btn-quiz btn-quiz-hard" onclick="startQuiz('hard')" data-i18n="checkHard">Only hard ⭐</button>
@@ -138,7 +156,20 @@
         <div class="quiz-container">
             <div class="quiz-word" id="quiz-en-word">...</div>
             <input type="text" id="quiz-es-input" class="quiz-input" data-i18n-placeholder="typeSpanish" placeholder="Type in Spanish..." autocomplete="off">
-            <br>
+            
+            <!-- Wirtualna klawiatura w quizie -->
+            <div class="es-keyboard">
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('quiz-es-input', 'á')">á</button>
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('quiz-es-input', 'é')">é</button>
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('quiz-es-input', 'í')">í</button>
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('quiz-es-input', 'ó')">ó</button>
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('quiz-es-input', 'ú')">ú</button>
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('quiz-es-input', 'ñ')">ñ</button>
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('quiz-es-input', 'ü')">ü</button>
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('quiz-es-input', '¿')">¿</button>
+                <button type="button" class="es-key" onmousedown="event.preventDefault(); insertChar('quiz-es-input', '¡')">¡</button>
+            </div>
+
             <div class="quiz-buttons">
                 <button class="btn btn-hint" id="quiz-hint-btn" data-i18n="hintBtn">Hint (1 letter)</button>
                 <button class="btn" id="quiz-check-btn" data-i18n="checkBtn">Check</button>
@@ -150,7 +181,7 @@
 
     <script>
         // === W TYM MIEJSCU PODMIEŃ LINK NA SWÓJ ===
-        const API_URL = "https://script.google.com/macros/s/AKfycbwa3Xq92PIir6MRUVsSH9tIN1tVoWY9Ij_vhikBOxbqnCKVLSWFhgUjDVIO8ku3RYGF/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbwyNkhxYdjVc6xdMzJtwMI9V3HW3kGsJv7T3r86m0oWQbsVzy0fpUQX62_MnKscxfx4/exec";
 
         const dictionary = {
             en: {
@@ -215,7 +246,7 @@
                 data.forEach(item => {
                     if(state[item.kategoria]) {
                         item.trudne = (item.trudne === true || item.trudne === 'true' || item.trudne === 'TRUE');
-                        item.level = parseInt(item.level) || 0; // Wczytywanie poziomu SRS
+                        item.level = parseInt(item.level) || 0; 
                         state[item.kategoria].push(item);
                     }
                 });
@@ -244,6 +275,15 @@
                     card.style.display = 'none';
                 }
             });
+        }
+
+        // --- FUNKCJA WSTAWIANIA ZNAKÓW ---
+        function insertChar(inputId, char) {
+            const input = document.getElementById(inputId);
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            input.value = input.value.substring(0, start) + char + input.value.substring(end);
+            input.selectionStart = input.selectionEnd = start + 1;
         }
 
         function openCategory(categoryName, searchTerm = '') {
@@ -325,7 +365,6 @@
             } else { alert(dictionary[currentLang].alertFill); }
         });
 
-        // --- ZMODYFIKOWANA LOGIKA QUIZU Z SRS ---
         function startQuiz(mode) {
             quizCards = [];
             const now = new Date();
@@ -338,8 +377,8 @@
                         categoryCards = categoryCards.filter(c => c.trudne === true);
                     } else if (mode === 'srs') {
                         categoryCards = categoryCards.filter(c => {
-                            if (!c.nextReview) return true; // Jeśli fiszka nie ma daty, wrzuć ją
-                            return new Date(c.nextReview) <= now; // Jeśli data minęła, wrzuć do testu
+                            if (!c.nextReview) return true; 
+                            return new Date(c.nextReview) <= now; 
                         });
                     }
                     
@@ -358,7 +397,6 @@
             else if (mode === 'srs') document.getElementById('quiz-title').textContent = dictionary[currentLang].testSrsTitle;
             else document.getElementById('quiz-title').textContent = dictionary[currentLang].testKnowledge;
 
-            // Mieszanie słówek
             for (let i = quizCards.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [quizCards[i], quizCards[j]] = [quizCards[j], quizCards[i]];
@@ -401,10 +439,9 @@
             let card = quizCards[currentQuizIndex];
             let isCorrect = (answer === correct);
 
-            // LOGIKA SRS (Obliczanie interwałów)
             let currentLevel = parseInt(card.level) || 0;
             let newLevel = isCorrect ? currentLevel + 1 : 0;
-            if (newLevel > 5) newLevel = 5; // Max level 5
+            if (newLevel > 5) newLevel = 5;
 
             let daysToAdd = 0;
             if (newLevel === 1) daysToAdd = 1;
@@ -416,17 +453,14 @@
             let nextReviewDate = new Date();
             nextReviewDate.setDate(nextReviewDate.getDate() + daysToAdd);
 
-            // Zapis do stanu lokalnego
             card.level = newLevel;
             card.nextReview = nextReviewDate.toISOString();
 
-            // Zapis do chmury
             fetch(API_URL, {
                 method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify({ action: 'update_srs', es: card.es, en: card.en, level: card.level, nextReview: card.nextReview })
             });
 
-            // Reakcja wizualna i audio
             if (isCorrect) {
                 feedback.textContent = dictionary[currentLang].quizCorrect;
                 feedback.className = 'quiz-feedback correct';
