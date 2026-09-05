@@ -103,6 +103,15 @@
         }
         .category-card:hover { transform: translateY(-5px); box-shadow: 0 6px 12px var(--shadow-color); color: #2193b0; }
 
+        /* --- STYL WYSZUKIWARKI --- */
+        #category-search {
+            width: 100%; max-width: 400px; padding: 12px 15px; margin: 10px 0 25px;
+            font-size: 1.1rem; border: 2px solid var(--input-border); border-radius: 8px;
+            background: var(--input-bg); color: var(--input-text); outline: none;
+            transition: border-color 0.3s;
+        }
+        #category-search:focus { border-color: #2193b0; }
+
         .grid-container {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; width: 100%;
         }
@@ -138,6 +147,11 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             font-size: 1.4rem; font-weight: 600; border-radius: 12px; padding: 10px; box-sizing: border-box;
         }
+        /* Zmniejszona czcionka dla długich zdań */
+        .flashcard[data-category="sentences"] .card-front, 
+        .flashcard[data-category="sentences"] .card-back {
+            font-size: 1rem;
+        }
         .card-front { background: linear-gradient(135deg, #ff5f6d, #ffc371); color: white; }
         .card-back { background: linear-gradient(135deg, #2193b0, #6dd5ed); color: white; transform: rotateY(180deg); }
         .pronunciation { font-size: 0.9rem; opacity: 0.85; font-weight: normal; margin-top: 8px; font-style: italic; }
@@ -162,7 +176,6 @@
 </head>
 <body>
 
-    <!-- TOP CONTROLS -->
     <div class="top-controls">
         <button id="lang-btn" class="ctrl-btn" onclick="toggleLanguage()">PL</button>
         <button id="theme-btn" class="ctrl-btn" onclick="toggleTheme()">🌙</button>
@@ -184,6 +197,7 @@
                 <option value="phrases" data-i18n="catPhrases">Phrases</option>
                 <option value="questions" data-i18n="catQuestions">Questions</option>
                 <option value="linking_words" data-i18n="catLinking">Linking words</option>
+                <option value="sentences" data-i18n="catSentences">Sentences</option>
             </select>
             <button class="btn" id="add-btn" data-i18n="addBtn">Add flashcard</button>
         </div>
@@ -196,6 +210,7 @@
             <div class="category-card" onclick="openCategory('phrases')" data-i18n="catPhrases">Phrases</div>
             <div class="category-card" onclick="openCategory('questions')" data-i18n="catQuestions">Questions</div>
             <div class="category-card" onclick="openCategory('linking_words')" data-i18n="catLinking">Linking words</div>
+            <div class="category-card" onclick="openCategory('sentences')" data-i18n="catSentences">Sentences</div>
         </div>
 
         <div class="quiz-buttons-main">
@@ -209,6 +224,7 @@
     <div id="view-category" class="view">
         <button class="btn btn-back" onclick="showView('view-home')" data-i18n="backMenu">⬅ Back to menu</button>
         <h2 id="category-title">Category</h2>
+        <input type="text" id="category-search" data-i18n-placeholder="searchSentences" placeholder="Search sentences..." onkeyup="filterCards()" style="display:none;">
         <div class="grid-container" id="flashcards-container"></div>
     </div>
 
@@ -231,10 +247,8 @@
     </div>
 
     <script>
-        // === W TYM MIEJSCU PODMIEŃ LINK NA SWÓJ ===
         const API_URL = "https://script.google.com/macros/s/AKfycbwyNkhxYdjVc6xdMzJtwMI9V3HW3kGsJv7T3r86m0oWQbsVzy0fpUQX62_MnKscxfx4/exec";
 
-        // --- I18N (SŁOWNIK TŁUMACZEŃ) ---
         const dictionary = {
             en: {
                 title: "Language Flashcards",
@@ -243,7 +257,7 @@
                 fonPlaceholder: "Pronunciation (e.g. [ga-to])",
                 addBtn: "Add flashcard",
                 catVerbs: "Verbs", catNouns: "Nouns", catAdjectives: "Adjectives",
-                catNumbers: "Numbers", catPhrases: "Phrases", catQuestions: "Questions", catLinking: "Linking words",
+                catNumbers: "Numbers", catPhrases: "Phrases", catQuestions: "Questions", catLinking: "Linking words", catSentences: "Sentences",
                 checkAll: "Check yourself (All)",
                 checkHard: "Only hard ⭐",
                 loading: "Connecting to Google Sheets...",
@@ -264,7 +278,8 @@
                 noCardsCat: "No flashcards in this category.",
                 quizCorrect: "Correct! 🎉",
                 quizWrong: "Wrong! Correct answer: ",
-                quizEnd: "No more flashcards! Returning..."
+                quizEnd: "No more flashcards! Returning...",
+                searchSentences: "Search sentences..."
             },
             pl: {
                 title: "Fiszki Językowe",
@@ -273,7 +288,7 @@
                 fonPlaceholder: "Wymowa (np. [ga-to])",
                 addBtn: "Dodaj fiszkę",
                 catVerbs: "Czasowniki", catNouns: "Rzeczowniki", catAdjectives: "Przymiotniki",
-                catNumbers: "Liczebniki", catPhrases: "Frazy", catQuestions: "Pytania", catLinking: "Słówka łączące",
+                catNumbers: "Liczebniki", catPhrases: "Frazy", catQuestions: "Pytania", catLinking: "Słówka łączące", catSentences: "Zdania",
                 checkAll: "Sprawdź się (Wszystkie)",
                 checkHard: "Tylko trudne ⭐",
                 loading: "Łączenie z bazą Google Sheets...",
@@ -294,13 +309,14 @@
                 noCardsCat: "Brak fiszek w tej kategorii.",
                 quizCorrect: "Dobrze! 🎉",
                 quizWrong: "Źle! Poprawna odpowiedź: ",
-                quizEnd: "Koniec fiszek! Wracamy..."
+                quizEnd: "Koniec fiszek! Wracamy...",
+                searchSentences: "Szukaj zdań..."
             }
         };
 
-        // --- ZARZĄDZANIE MOTYWEM I JĘZYKIEM ---
         let currentLang = localStorage.getItem('appLang') || 'en';
         let currentTheme = localStorage.getItem('appTheme') || 'light';
+        let activeCategory = '';
 
         function applyLanguage() {
             document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -336,14 +352,12 @@
             applyTheme();
         }
 
-        // Inicjalizacja UI
         applyLanguage();
         applyTheme();
 
-        // --- STAN APLIKACJI I DANE ---
         const state = {
             verbs: [], nouns: [], adjectives: [], 
-            numbers: [], phrases: [], questions: [], linking_words: []
+            numbers: [], phrases: [], questions: [], linking_words: [], sentences: []
         };
         let quizCards = [];
         let currentQuizIndex = 0;
@@ -373,11 +387,38 @@
             document.getElementById(viewId).classList.add('active');
         }
 
-        function openCategory(categoryName) {
+        // Nawigacja i wyszukiwanie z podwójnego kliknięcia
+        function goToSentences(wordToSearch) {
+            openCategory('sentences', wordToSearch);
+        }
+
+        function filterCards() {
+            const term = document.getElementById('category-search').value.toLowerCase();
+            const cards = document.querySelectorAll('#flashcards-container .flashcard');
+            cards.forEach(card => {
+                if (card.dataset.es.includes(term) || card.dataset.en.includes(term)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function openCategory(categoryName, searchTerm = '') {
+            activeCategory = categoryName;
             const title = document.getElementById('category-title');
             const dictKey = 'cat' + categoryName.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('');
             title.textContent = dictionary[currentLang][dictKey] || categoryName;
             
+            const searchInput = document.getElementById('category-search');
+            if (categoryName === 'sentences') {
+                searchInput.style.display = 'block';
+                searchInput.value = searchTerm;
+            } else {
+                searchInput.style.display = 'none';
+                searchInput.value = '';
+            }
+
             const container = document.getElementById('flashcards-container');
             container.innerHTML = ''; 
 
@@ -387,7 +428,20 @@
                 state[categoryName].forEach(card => {
                     const div = document.createElement('div');
                     div.className = 'flashcard';
+                    div.dataset.category = categoryName;
+                    div.dataset.es = card.es.toLowerCase();
+                    div.dataset.en = card.en.toLowerCase();
+                    
                     div.onclick = function() { this.classList.toggle('flipped'); };
+                    
+                    // Podwójne kliknięcie (przejście do zdań z odfiltrowanym słowem)
+                    div.ondblclick = function(event) {
+                        if (activeCategory !== 'sentences') {
+                            // Usuwanie hiszpańskich rodzajników dla lepszych wyników wyszukiwania
+                            let searchWord = card.es.replace(/^(el|la|los|las|un|una|unos|unas)\s+/i, '').trim();
+                            goToSentences(searchWord);
+                        }
+                    };
                     
                     let fonHtml = card.fon ? `<span class="pronunciation">${card.fon}</span>` : '';
                     let isHardClass = card.trudne ? 'active' : '';
@@ -406,7 +460,9 @@
                     container.appendChild(div);
                 });
             }
+            
             showView('view-category');
+            if (searchTerm !== '') filterCards();
         }
 
         function toggleHard(event, category, esWord) {
@@ -456,9 +512,12 @@
         function startQuiz(onlyHard) {
             quizCards = [];
             for (let key in state) {
-                let categoryCards = state[key];
-                if (onlyHard) categoryCards = categoryCards.filter(c => c.trudne === true);
-                quizCards = quizCards.concat(categoryCards);
+                // Wyłączamy "Zdania" z regularnego quizu (bo są zbyt długie do wpisywania)
+                if (key !== 'sentences') {
+                    let categoryCards = state[key];
+                    if (onlyHard) categoryCards = categoryCards.filter(c => c.trudne === true);
+                    quizCards = quizCards.concat(categoryCards);
+                }
             }
 
             if (quizCards.length === 0) {
