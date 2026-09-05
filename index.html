@@ -5,167 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Language Flashcards</title>
     <style>
-        /* --- ZMIENNE KOLORYSTYCZNE (MOTYWY) --- */
         :root {
-            --bg-color: #f0f2f5;
-            --text-color: #333;
-            --card-bg: white;
-            --input-bg: white;
-            --input-text: #333;
-            --input-border: #ccc;
-            --shadow-color: rgba(0,0,0,0.05);
-            --hint-text: #666;
+            --bg-color: #f0f2f5; --text-color: #333; --card-bg: white;
+            --input-bg: white; --input-text: #333; --input-border: #ccc;
+            --shadow-color: rgba(0,0,0,0.05); --hint-text: #666;
         }
-        
         body.dark-theme {
-            --bg-color: #18191a;
-            --text-color: #e4e6eb;
-            --card-bg: #242526;
-            --input-bg: #3a3b3c;
-            --input-text: #e4e6eb;
-            --input-border: #555;
-            --shadow-color: rgba(0,0,0,0.3);
-            --hint-text: #b0b3b8;
+            --bg-color: #18191a; --text-color: #e4e6eb; --card-bg: #242526;
+            --input-bg: #3a3b3c; --input-text: #e4e6eb; --input-border: #555;
+            --shadow-color: rgba(0,0,0,0.3); --hint-text: #b0b3b8;
         }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 60px 20px 40px;
-            margin: 0;
-            transition: background-color 0.3s, color 0.3s;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; align-items: center; padding: 60px 20px 40px; margin: 0; transition: background-color 0.3s, color 0.3s; }
         h1, h2 { color: var(--text-color); margin-bottom: 20px; text-align: center; }
         
-        /* --- PRZEŁĄCZNIKI W PRAWYM GÓRNYM ROGU --- */
-        .top-controls {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-        }
-        .ctrl-btn {
-            background-color: var(--card-bg);
-            color: var(--text-color);
-            border: 1px solid var(--input-border);
-            border-radius: 20px;
-            padding: 5px 15px;
-            font-size: 1rem;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
-            box-shadow: 0 2px 5px var(--shadow-color);
-        }
+        .top-controls { position: absolute; top: 15px; right: 20px; display: flex; gap: 10px; }
+        .ctrl-btn { background-color: var(--card-bg); color: var(--text-color); border: 1px solid var(--input-border); border-radius: 20px; padding: 5px 15px; font-size: 1rem; cursor: pointer; font-weight: bold; transition: 0.2s; box-shadow: 0 2px 5px var(--shadow-color); }
         .ctrl-btn:hover { filter: brightness(0.9); }
         
         .view { display: none; width: 100%; max-width: 1200px; flex-direction: column; align-items: center; }
         .view.active { display: flex; }
         
-        .add-card-form {
-            display: flex; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; 
-            justify-content: center; background: var(--card-bg); padding: 20px; 
-            border-radius: 12px; box-shadow: 0 4px 8px var(--shadow-color);
-            transition: background-color 0.3s;
-        }
-        .add-card-form input, .add-card-form select {
-            padding: 10px 15px; font-size: 1rem; border: 1px solid var(--input-border); 
-            border-radius: 8px; outline: none; background: var(--input-bg); color: var(--input-text);
-        }
-        .btn {
-            padding: 10px 20px; font-size: 1rem; font-weight: 600; background-color: #2193b0;
-            color: white; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s;
-        }
+        .add-card-form { display: flex; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center; background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px var(--shadow-color); transition: background-color 0.3s; }
+        .add-card-form input, .add-card-form select { padding: 10px 15px; font-size: 1rem; border: 1px solid var(--input-border); border-radius: 8px; outline: none; background: var(--input-bg); color: var(--input-text); }
+        .btn { padding: 10px 20px; font-size: 1rem; font-weight: 600; background-color: #2193b0; color: white; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; }
         .btn:hover { background-color: #1a7a92; }
         
         .quiz-buttons-main { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
-        .btn-quiz { background-color: #ff5f6d; font-size: 1.1rem; padding: 15px 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .btn-quiz:hover { background-color: #e04e5a; }
+        .btn-quiz { background-color: #6c757d; font-size: 1.1rem; padding: 15px 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .btn-quiz:hover { filter: brightness(1.1); }
+        .btn-quiz-srs { background-color: #ff5f6d; } /* Czerwony wyróżniony dla SRS */
         .btn-quiz-hard { background-color: #dc3545; }
-        .btn-quiz-hard:hover { background-color: #c82333; }
         
         .btn-hint { background-color: #ffc107; color: #333; }
         .btn-hint:disabled { background-color: #ffe8a1; color: #999; cursor: not-allowed; }
         .btn-back { background-color: #6c757d; margin-bottom: 20px; align-self: flex-start; }
         
-        .nav-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 15px; width: 100%; max-width: 900px; margin-bottom: 30px;
-        }
-        .category-card {
-            background: var(--card-bg); padding: 20px; text-align: center; border-radius: 12px;
-            cursor: pointer; font-weight: bold; color: var(--text-color); box-shadow: 0 4px 8px var(--shadow-color);
-            transition: 0.2s; font-size: 1.1rem;
-        }
+        .nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; width: 100%; max-width: 900px; margin-bottom: 30px; }
+        .category-card { background: var(--card-bg); padding: 20px; text-align: center; border-radius: 12px; cursor: pointer; font-weight: bold; color: var(--text-color); box-shadow: 0 4px 8px var(--shadow-color); transition: 0.2s; font-size: 1.1rem; }
         .category-card:hover { transform: translateY(-5px); box-shadow: 0 6px 12px var(--shadow-color); color: #2193b0; }
 
-        /* --- STYL WYSZUKIWARKI --- */
-        #category-search {
-            width: 100%; max-width: 400px; padding: 12px 15px; margin: 10px 0 25px;
-            font-size: 1.1rem; border: 2px solid var(--input-border); border-radius: 8px;
-            background: var(--input-bg); color: var(--input-text); outline: none;
-            transition: border-color 0.3s;
-        }
+        #category-search { width: 100%; max-width: 400px; padding: 12px 15px; margin: 10px 0 25px; font-size: 1.1rem; border: 2px solid var(--input-border); border-radius: 8px; background: var(--input-bg); color: var(--input-text); outline: none; transition: border-color 0.3s; }
         #category-search:focus { border-color: #2193b0; }
 
-        .grid-container {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; width: 100%;
-        }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; width: 100%; }
         
-        .flashcard {
-            background-color: transparent; width: 100%; height: 150px; perspective: 1000px;
-            cursor: pointer; position: relative;
-        }
-        
-        .star-btn {
-            position: absolute; top: 10px; right: 10px; font-size: 1.5rem;
-            cursor: pointer; z-index: 10; opacity: 0.2; transition: 0.2s;
-            text-shadow: 0 0 2px rgba(255,255,255,0.5); user-select: none;
-        }
-        .star-btn.active {
-            opacity: 1; color: #ffeb3b; text-shadow: 0 0 5px rgba(0,0,0,0.5);
-        }
-        .audio-btn {
-            position: absolute; top: 10px; left: 10px; font-size: 1.5rem;
-            cursor: pointer; z-index: 10; opacity: 0.5; transition: 0.2s;
-            text-shadow: 0 0 2px rgba(255,255,255,0.5); user-select: none;
-        }
+        .flashcard { background-color: transparent; width: 100%; height: 150px; perspective: 1000px; cursor: pointer; position: relative; }
+        .star-btn { position: absolute; top: 10px; right: 10px; font-size: 1.5rem; cursor: pointer; z-index: 10; opacity: 0.2; transition: 0.2s; text-shadow: 0 0 2px rgba(255,255,255,0.5); user-select: none; }
+        .star-btn.active { opacity: 1; color: #ffeb3b; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
+        .audio-btn { position: absolute; top: 10px; left: 10px; font-size: 1.5rem; cursor: pointer; z-index: 10; opacity: 0.5; transition: 0.2s; text-shadow: 0 0 2px rgba(255,255,255,0.5); user-select: none; }
         .audio-btn:hover { opacity: 1; transform: scale(1.1); }
 
-        .card-inner {
-            position: relative; width: 100%; height: 100%; text-align: center;
-            transition: transform 0.6s; transform-style: preserve-3d; border-radius: 12px;
-            box-shadow: 0 4px 8px var(--shadow-color);
-        }
+        .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; border-radius: 12px; box-shadow: 0 4px 8px var(--shadow-color); }
         .flashcard.flipped .card-inner { transform: rotateY(180deg); }
-        .card-front, .card-back {
-            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 1.4rem; font-weight: 600; border-radius: 12px; padding: 10px; box-sizing: border-box;
-        }
-        /* Zmniejszona czcionka dla długich zdań */
-        .flashcard[data-category="sentences"] .card-front, 
-        .flashcard[data-category="sentences"] .card-back {
-            font-size: 1rem;
-        }
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 600; border-radius: 12px; padding: 10px; box-sizing: border-box; }
+        .flashcard[data-category="sentences"] .card-front, .flashcard[data-category="sentences"] .card-back { font-size: 1rem; }
         .card-front { background: linear-gradient(135deg, #ff5f6d, #ffc371); color: white; }
         .card-back { background: linear-gradient(135deg, #2193b0, #6dd5ed); color: white; transform: rotateY(180deg); }
         .pronunciation { font-size: 0.9rem; opacity: 0.85; font-weight: normal; margin-top: 8px; font-style: italic; }
 
-        .quiz-container {
-            background: var(--card-bg); padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px var(--shadow-color);
-            text-align: center; width: 100%; max-width: 600px; margin-top: 20px; transition: background-color 0.3s;
-        }
+        .quiz-container { background: var(--card-bg); padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px var(--shadow-color); text-align: center; width: 100%; max-width: 600px; margin-top: 20px; transition: background-color 0.3s; }
         .quiz-word { font-size: 2.5rem; margin-bottom: 25px; color: #2193b0; font-weight: bold; }
-        .quiz-input { 
-            padding: 15px; width: 80%; font-size: 1.2rem; margin-bottom: 20px; 
-            border: 2px solid var(--input-border); border-radius: 8px; text-align: center; 
-            outline: none; transition: 0.3s; background: var(--input-bg); color: var(--input-text);
-        }
+        .quiz-input { padding: 15px; width: 80%; font-size: 1.2rem; margin-bottom: 20px; border: 2px solid var(--input-border); border-radius: 8px; text-align: center; outline: none; transition: 0.3s; background: var(--input-bg); color: var(--input-text); }
         .quiz-input:focus { border-color: #2193b0; }
         .quiz-feedback { margin-top: 20px; font-size: 1.3rem; font-weight: bold; min-height: 30px; }
         .quiz-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
@@ -214,8 +114,10 @@
         </div>
 
         <div class="quiz-buttons-main">
-            <button class="btn btn-quiz" onclick="startQuiz(false)" data-i18n="checkAll">Check yourself (All)</button>
-            <button class="btn btn-quiz btn-quiz-hard" onclick="startQuiz(true)" data-i18n="checkHard">Only hard ⭐</button>
+            <!-- Dodany główny przycisk do SRS -->
+            <button class="btn btn-quiz btn-quiz-srs" onclick="startQuiz('srs')" data-i18n="checkSrs">Smart Review (SRS) 🔥</button>
+            <button class="btn btn-quiz" onclick="startQuiz('all')" data-i18n="checkAll">Check all</button>
+            <button class="btn btn-quiz btn-quiz-hard" onclick="startQuiz('hard')" data-i18n="checkHard">Only hard ⭐</button>
         </div>
         <p id="loading-status" data-i18n="loading">Connecting to Google Sheets...</p>
     </div>
@@ -247,70 +149,31 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbwyNkhxYdjVc6xdMzJtwMI9V3HW3kGsJv7T3r86m0oWQbsVzy0fpUQX62_MnKscxfx4/exec";
+        // === W TYM MIEJSCU PODMIEŃ LINK NA SWÓJ ===
+        const API_URL = "https://script.google.com/macros/s/AKfycbwa3Xq92PIir6MRUVsSH9tIN1tVoWY9Ij_vhikBOxbqnCKVLSWFhgUjDVIO8ku3RYGF/exec";
 
         const dictionary = {
             en: {
-                title: "Language Flashcards",
-                enPlaceholder: "English (e.g. cat)",
-                esPlaceholder: "Spanish (e.g. gato)",
-                fonPlaceholder: "Pronunciation (e.g. [ga-to])",
-                addBtn: "Add flashcard",
-                catVerbs: "Verbs", catNouns: "Nouns", catAdjectives: "Adjectives",
-                catNumbers: "Numbers", catPhrases: "Phrases", catQuestions: "Questions", catLinking: "Linking words", catSentences: "Sentences",
-                checkAll: "Check yourself (All)",
-                checkHard: "Only hard ⭐",
-                loading: "Connecting to Google Sheets...",
-                backMenu: "⬅ Back to menu",
-                stopQuiz: "⬅ Stop & Go back",
-                testKnowledge: "Test your knowledge",
-                typeSpanish: "Type in Spanish...",
-                hintBtn: "Hint (1 letter)",
-                checkBtn: "Check",
-                nextBtn: "Next word",
-                alertFill: "Please fill at least English and Spanish fields!",
-                alertAdded: "New flashcard added!",
-                alertNoCards: "No flashcards in the database!",
-                alertNoHard: "No hard flashcards (with star) found!",
-                testHardTitle: "Test: Only Hard Words ⭐",
-                loadedSuccess: "All words loaded! ✅",
-                loadedError: "Error loading data from Google Sheets :(",
-                noCardsCat: "No flashcards in this category.",
-                quizCorrect: "Correct! 🎉",
-                quizWrong: "Wrong! Correct answer: ",
-                quizEnd: "No more flashcards! Returning...",
-                searchSentences: "Search sentences..."
+                title: "Language Flashcards", enPlaceholder: "English (e.g. cat)", esPlaceholder: "Spanish (e.g. gato)", fonPlaceholder: "Pronunciation (e.g. [ga-to])",
+                addBtn: "Add flashcard", catVerbs: "Verbs", catNouns: "Nouns", catAdjectives: "Adjectives", catNumbers: "Numbers", catPhrases: "Phrases", catQuestions: "Questions", catLinking: "Linking words", catSentences: "Sentences",
+                checkSrs: "Smart Review (SRS) 🔥", checkAll: "Check all", checkHard: "Only hard ⭐",
+                loading: "Connecting to Google Sheets...", backMenu: "⬅ Back to menu", stopQuiz: "⬅ Stop & Go back", testKnowledge: "Test your knowledge",
+                typeSpanish: "Type in Spanish...", hintBtn: "Hint (1 letter)", checkBtn: "Check", nextBtn: "Next word", alertFill: "Please fill at least English and Spanish fields!",
+                alertAdded: "New flashcard added!", alertNoCards: "No flashcards in the database!", alertNoHard: "No hard flashcards (with star) found!",
+                alertNoSrs: "You're all caught up! No cards to review today. 🎉", testHardTitle: "Test: Only Hard Words ⭐", testSrsTitle: "Smart Review: Due Today 🔥",
+                loadedSuccess: "All words loaded! ✅", loadedError: "Error loading data from Google Sheets :(", noCardsCat: "No flashcards in this category.",
+                quizCorrect: "Correct! 🎉", quizWrong: "Wrong! Correct answer: ", quizEnd: "No more flashcards! Returning...", searchSentences: "Search sentences..."
             },
             pl: {
-                title: "Fiszki Językowe",
-                enPlaceholder: "Angielski (np. cat)",
-                esPlaceholder: "Hiszpański (np. gato)",
-                fonPlaceholder: "Wymowa (np. [ga-to])",
-                addBtn: "Dodaj fiszkę",
-                catVerbs: "Czasowniki", catNouns: "Rzeczowniki", catAdjectives: "Przymiotniki",
-                catNumbers: "Liczebniki", catPhrases: "Frazy", catQuestions: "Pytania", catLinking: "Słówka łączące", catSentences: "Zdania",
-                checkAll: "Sprawdź się (Wszystkie)",
-                checkHard: "Tylko trudne ⭐",
-                loading: "Łączenie z bazą Google Sheets...",
-                backMenu: "⬅ Wróć do menu",
-                stopQuiz: "⬅ Przerwij i wróć",
-                testKnowledge: "Sprawdź swoją wiedzę",
-                typeSpanish: "Wpisz po hiszpańsku...",
-                hintBtn: "Podpowiedź (1 litera)",
-                checkBtn: "Sprawdź",
-                nextBtn: "Następne słowo",
-                alertFill: "Proszę wypełnić przynajmniej pole Angielski i Hiszpański!",
-                alertAdded: "Dodano nową fiszkę!",
-                alertNoCards: "Brak fiszek w bazie!",
-                alertNoHard: "Brak trudnych fiszek (z gwiazdką)!",
-                testHardTitle: "Test: Tylko trudne ⭐",
-                loadedSuccess: "Pobrano wszystkie słówka! ✅",
-                loadedError: "Błąd pobierania danych z bazy :(",
-                noCardsCat: "Brak fiszek w tej kategorii.",
-                quizCorrect: "Dobrze! 🎉",
-                quizWrong: "Źle! Poprawna odpowiedź: ",
-                quizEnd: "Koniec fiszek! Wracamy...",
-                searchSentences: "Szukaj zdań..."
+                title: "Fiszki Językowe", enPlaceholder: "Angielski (np. cat)", esPlaceholder: "Hiszpański (np. gato)", fonPlaceholder: "Wymowa (np. [ga-to])",
+                addBtn: "Dodaj fiszkę", catVerbs: "Czasowniki", catNouns: "Rzeczowniki", catAdjectives: "Przymiotniki", catNumbers: "Liczebniki", catPhrases: "Frazy", catQuestions: "Pytania", catLinking: "Słówka łączące", catSentences: "Zdania",
+                checkSrs: "Inteligentna powtórka (SRS) 🔥", checkAll: "Sprawdź wszystkie", checkHard: "Tylko trudne ⭐",
+                loading: "Łączenie z bazą Google Sheets...", backMenu: "⬅ Wróć do menu", stopQuiz: "⬅ Przerwij i wróć", testKnowledge: "Sprawdź swoją wiedzę",
+                typeSpanish: "Wpisz po hiszpańsku...", hintBtn: "Podpowiedź (1 litera)", checkBtn: "Sprawdź", nextBtn: "Następne słowo", alertFill: "Proszę wypełnić przynajmniej pole Angielski i Hiszpański!",
+                alertAdded: "Dodano nową fiszkę!", alertNoCards: "Brak fiszek w bazie!", alertNoHard: "Brak trudnych fiszek (z gwiazdką)!",
+                alertNoSrs: "Wszystko umiesz! Brak słówek do powtórki na dzisiaj. 🎉", testHardTitle: "Test: Tylko trudne ⭐", testSrsTitle: "Inteligentna Powtórka 🔥",
+                loadedSuccess: "Pobrano wszystkie słówka! ✅", loadedError: "Błąd pobierania danych z bazy :(", noCardsCat: "Brak fiszek w tej kategorii.",
+                quizCorrect: "Dobrze! 🎉", quizWrong: "Źle! Poprawna odpowiedź: ", quizEnd: "Koniec fiszek! Wracamy...", searchSentences: "Szukaj zdań..."
             }
         };
 
@@ -330,35 +193,16 @@
             document.getElementById('lang-btn').textContent = currentLang === 'en' ? 'PL' : 'EN';
         }
 
-        function toggleLanguage() {
-            currentLang = currentLang === 'en' ? 'pl' : 'en';
-            localStorage.setItem('appLang', currentLang);
-            applyLanguage();
-        }
-
+        function toggleLanguage() { currentLang = currentLang === 'en' ? 'pl' : 'en'; localStorage.setItem('appLang', currentLang); applyLanguage(); }
         function applyTheme() {
-            if (currentTheme === 'dark') {
-                document.body.classList.add('dark-theme');
-                document.getElementById('theme-btn').textContent = '☀️';
-            } else {
-                document.body.classList.remove('dark-theme');
-                document.getElementById('theme-btn').textContent = '🌙';
-            }
+            if (currentTheme === 'dark') { document.body.classList.add('dark-theme'); document.getElementById('theme-btn').textContent = '☀️'; }
+            else { document.body.classList.remove('dark-theme'); document.getElementById('theme-btn').textContent = '🌙'; }
         }
+        function toggleTheme() { currentTheme = currentTheme === 'light' ? 'dark' : 'light'; localStorage.setItem('appTheme', currentTheme); applyTheme(); }
 
-        function toggleTheme() {
-            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-            localStorage.setItem('appTheme', currentTheme);
-            applyTheme();
-        }
+        applyLanguage(); applyTheme();
 
-        applyLanguage();
-        applyTheme();
-
-        const state = {
-            verbs: [], nouns: [], adjectives: [], 
-            numbers: [], phrases: [], questions: [], linking_words: [], sentences: []
-        };
+        const state = { verbs: [], nouns: [], adjectives: [], numbers: [], phrases: [], questions: [], linking_words: [], sentences: [] };
         let quizCards = [];
         let currentQuizIndex = 0;
         let hintCount = 0;
@@ -371,6 +215,7 @@
                 data.forEach(item => {
                     if(state[item.kategoria]) {
                         item.trudne = (item.trudne === true || item.trudne === 'true' || item.trudne === 'TRUE');
+                        item.level = parseInt(item.level) || 0; // Wczytywanie poziomu SRS
                         state[item.kategoria].push(item);
                     }
                 });
@@ -387,10 +232,7 @@
             document.getElementById(viewId).classList.add('active');
         }
 
-        // Nawigacja i wyszukiwanie z podwójnego kliknięcia
-        function goToSentences(wordToSearch) {
-            openCategory('sentences', wordToSearch);
-        }
+        function goToSentences(wordToSearch) { openCategory('sentences', wordToSearch); }
 
         function filterCards() {
             const term = document.getElementById('category-search').value.toLowerCase();
@@ -411,13 +253,8 @@
             title.textContent = dictionary[currentLang][dictKey] || categoryName;
             
             const searchInput = document.getElementById('category-search');
-            if (categoryName === 'sentences') {
-                searchInput.style.display = 'block';
-                searchInput.value = searchTerm;
-            } else {
-                searchInput.style.display = 'none';
-                searchInput.value = '';
-            }
+            if (categoryName === 'sentences') { searchInput.style.display = 'block'; searchInput.value = searchTerm; }
+            else { searchInput.style.display = 'none'; searchInput.value = ''; }
 
             const container = document.getElementById('flashcards-container');
             container.innerHTML = ''; 
@@ -427,17 +264,12 @@
             } else {
                 state[categoryName].forEach(card => {
                     const div = document.createElement('div');
-                    div.className = 'flashcard';
-                    div.dataset.category = categoryName;
-                    div.dataset.es = card.es.toLowerCase();
-                    div.dataset.en = card.en.toLowerCase();
-                    
+                    div.className = 'flashcard'; div.dataset.category = categoryName;
+                    div.dataset.es = card.es.toLowerCase(); div.dataset.en = card.en.toLowerCase();
                     div.onclick = function() { this.classList.toggle('flipped'); };
                     
-                    // Podwójne kliknięcie (przejście do zdań z odfiltrowanym słowem)
                     div.ondblclick = function(event) {
                         if (activeCategory !== 'sentences') {
-                            // Usuwanie hiszpańskich rodzajników dla lepszych wyników wyszukiwania
                             let searchWord = card.es.replace(/^(el|la|los|las|un|una|unos|unas)\s+/i, '').trim();
                             goToSentences(searchWord);
                         }
@@ -451,16 +283,12 @@
                         <div class="star-btn ${isHardClass}" onclick="toggleHard(event, '${categoryName}', '${card.es.replace(/'/g, "\\'")}')">⭐</div>
                         <div class="card-inner">
                             <div class="card-front">${card.en}</div>
-                            <div class="card-back">
-                                <span>${card.es}</span>
-                                ${fonHtml}
-                            </div>
+                            <div class="card-back"><span>${card.es}</span>${fonHtml}</div>
                         </div>
                     `;
                     container.appendChild(div);
                 });
             }
-            
             showView('view-category');
             if (searchTerm !== '') filterCards();
         }
@@ -471,13 +299,9 @@
             if (card) {
                 card.trudne = !card.trudne;
                 event.target.classList.toggle('active', card.trudne);
-
                 fetch(API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({
-                        action: 'update_trudne', es: card.es, en: card.en, trudne: card.trudne
-                    })
+                    method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ action: 'update_trudne', es: card.es, en: card.en, trudne: card.trudne })
                 }).catch(err => console.error("Error updating star in the cloud", err));
             }
         }
@@ -489,44 +313,52 @@
             const cat = document.getElementById('category-select').value;
 
             if (es && en) {
-                const newCard = { kategoria: cat, es: es, en: en, fon: fon, trudne: false };
+                const newCard = { kategoria: cat, es: es, en: en, fon: fon, trudne: false, level: 0, nextReview: new Date().toISOString() };
                 state[cat].unshift(newCard); 
-                
                 fetch(API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify({ action: 'add', ...newCard })
                 });
-
-                document.getElementById('es-input').value = '';
-                document.getElementById('fon-input').value = '';
-                document.getElementById('en-input').value = '';
+                document.getElementById('es-input').value = ''; document.getElementById('fon-input').value = ''; document.getElementById('en-input').value = '';
                 alert(dictionary[currentLang].alertAdded);
                 document.getElementById('en-input').focus();
-            } else {
-                alert(dictionary[currentLang].alertFill);
-            }
+            } else { alert(dictionary[currentLang].alertFill); }
         });
 
-        // --- QUIZ LOGIC ---
-        function startQuiz(onlyHard) {
+        // --- ZMODYFIKOWANA LOGIKA QUIZU Z SRS ---
+        function startQuiz(mode) {
             quizCards = [];
+            const now = new Date();
+
             for (let key in state) {
-                // Wyłączamy "Zdania" z regularnego quizu (bo są zbyt długie do wpisywania)
                 if (key !== 'sentences') {
                     let categoryCards = state[key];
-                    if (onlyHard) categoryCards = categoryCards.filter(c => c.trudne === true);
+                    
+                    if (mode === 'hard') {
+                        categoryCards = categoryCards.filter(c => c.trudne === true);
+                    } else if (mode === 'srs') {
+                        categoryCards = categoryCards.filter(c => {
+                            if (!c.nextReview) return true; // Jeśli fiszka nie ma daty, wrzuć ją
+                            return new Date(c.nextReview) <= now; // Jeśli data minęła, wrzuć do testu
+                        });
+                    }
+                    
                     quizCards = quizCards.concat(categoryCards);
                 }
             }
 
             if (quizCards.length === 0) {
-                alert(onlyHard ? dictionary[currentLang].alertNoHard : dictionary[currentLang].alertNoCards);
+                if (mode === 'hard') alert(dictionary[currentLang].alertNoHard);
+                else if (mode === 'srs') alert(dictionary[currentLang].alertNoSrs);
+                else alert(dictionary[currentLang].alertNoCards);
                 return;
             }
 
-            document.getElementById('quiz-title').textContent = onlyHard ? dictionary[currentLang].testHardTitle : dictionary[currentLang].testKnowledge;
+            if (mode === 'hard') document.getElementById('quiz-title').textContent = dictionary[currentLang].testHardTitle;
+            else if (mode === 'srs') document.getElementById('quiz-title').textContent = dictionary[currentLang].testSrsTitle;
+            else document.getElementById('quiz-title').textContent = dictionary[currentLang].testKnowledge;
 
+            // Mieszanie słówek
             for (let i = quizCards.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [quizCards[i], quizCards[j]] = [quizCards[j], quizCards[i]];
@@ -540,8 +372,7 @@
         function loadQuizCard() {
             hintCount = 0;
             const hintBtn = document.getElementById('quiz-hint-btn');
-            hintBtn.style.display = 'inline-block';
-            hintBtn.disabled = false;
+            hintBtn.style.display = 'inline-block'; hintBtn.disabled = false;
 
             document.getElementById('quiz-en-word').textContent = quizCards[currentQuizIndex].en;
             document.getElementById('quiz-es-input').value = '';
@@ -557,9 +388,7 @@
             const inputField = document.getElementById('quiz-es-input');
             
             if (hintCount < correctWord.length) {
-                hintCount++;
-                inputField.value = correctWord.substring(0, hintCount);
-                inputField.focus();
+                hintCount++; inputField.value = correctWord.substring(0, hintCount); inputField.focus();
             }
             if (hintCount >= correctWord.length) { document.getElementById('quiz-hint-btn').disabled = true; }
         });
@@ -568,8 +397,37 @@
             const answer = document.getElementById('quiz-es-input').value.trim().toLowerCase();
             const correct = quizCards[currentQuizIndex].es.toLowerCase();
             const feedback = document.getElementById('quiz-feedback');
+            
+            let card = quizCards[currentQuizIndex];
+            let isCorrect = (answer === correct);
 
-            if (answer === correct) {
+            // LOGIKA SRS (Obliczanie interwałów)
+            let currentLevel = parseInt(card.level) || 0;
+            let newLevel = isCorrect ? currentLevel + 1 : 0;
+            if (newLevel > 5) newLevel = 5; // Max level 5
+
+            let daysToAdd = 0;
+            if (newLevel === 1) daysToAdd = 1;
+            else if (newLevel === 2) daysToAdd = 3;
+            else if (newLevel === 3) daysToAdd = 7;
+            else if (newLevel === 4) daysToAdd = 14;
+            else if (newLevel === 5) daysToAdd = 30;
+
+            let nextReviewDate = new Date();
+            nextReviewDate.setDate(nextReviewDate.getDate() + daysToAdd);
+
+            // Zapis do stanu lokalnego
+            card.level = newLevel;
+            card.nextReview = nextReviewDate.toISOString();
+
+            // Zapis do chmury
+            fetch(API_URL, {
+                method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: 'update_srs', es: card.es, en: card.en, level: card.level, nextReview: card.nextReview })
+            });
+
+            // Reakcja wizualna i audio
+            if (isCorrect) {
                 feedback.textContent = dictionary[currentLang].quizCorrect;
                 feedback.className = 'quiz-feedback correct';
                 if ('speechSynthesis' in window) {
@@ -615,8 +473,7 @@
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel(); 
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'es-ES'; 
-                utterance.rate = 0.9; 
+                utterance.lang = 'es-ES'; utterance.rate = 0.9; 
                 window.speechSynthesis.speak(utterance);
             } else {
                 alert("Your browser does not support audio playback.");
